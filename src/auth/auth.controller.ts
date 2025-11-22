@@ -12,17 +12,20 @@ import {
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { AuthGuard } from './auth.guard';
+import { Public } from './decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @UsePipes(new ValidationPipe())
   @Post('register')
   register(@Body() body: CreateUserDto) {
     return this.authService.register(body);
   }
 
+  @Public()
   @HttpCode(200)
   @UsePipes(new ValidationPipe())
   @Post('login')

@@ -10,7 +10,7 @@ const environmentConfig = () => {
     },
     JWT: {
       SECRET: process.env.JWT_SECRET,
-      EXPIRES_IN: process.env.JWT_EXPIRES_IN || '2m',
+      EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1h',
     },
   };
 };

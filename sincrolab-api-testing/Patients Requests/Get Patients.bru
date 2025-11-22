@@ -1,0 +1,16 @@
+meta {
+  name: Get Patients
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host}}/patient/c579c640-d556-4981-8674-84d7b0387ffa
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

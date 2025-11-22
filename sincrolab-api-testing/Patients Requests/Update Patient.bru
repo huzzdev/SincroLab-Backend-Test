@@ -1,0 +1,22 @@
+meta {
+  name: Update Patient
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{host}}/patient/c579c640-d556-4981-8674-84d7b0387ffa
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "fullName" : "testingg"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Create Patient
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{host}}/patient
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "fullName" : "testing"
+  }
+}
+
+body:xml {
+  {
+    "fullName" : "123"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
