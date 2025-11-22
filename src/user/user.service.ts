@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateUserEntity, UserEntity } from './entity/user.entity';
+import { UserEntity } from './entity/user.entity';
 import { Maybe } from 'src/common/types';
 import { UserWhereUniqueInput } from 'generated/prisma/models';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -9,10 +9,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: CreateUserDto): Promise<CreateUserEntity> {
+  async create(data: CreateUserDto): Promise<UserEntity> {
     return this.prisma.user.create({
       data: { ...data, role: 'therapist' },
-      select: { id: true, email: true, role: true },
     });
   }
 
