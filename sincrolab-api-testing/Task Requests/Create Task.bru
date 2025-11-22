@@ -5,17 +5,15 @@ meta {
 }
 
 post {
-  url: {{host}}/task
+  url: {{host}}/patient/fd2ac679-77ec-46b7-8052-027f7946509e/tasks
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "title" : "One",
-    "description" : "Two",
-    "status" : "done",
-    "patientId" : "fd2ac679-77ec-46b7-8052-027f7946509e"
+    "title" : "OneTwo",
+    "description" : "TwoThree"
   }
 }
 

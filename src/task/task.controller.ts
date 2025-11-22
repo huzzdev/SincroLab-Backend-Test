@@ -1,7 +1,5 @@
 import {
   Controller,
-  Get,
-  Post,
   Body,
   Patch,
   Param,
@@ -9,27 +7,15 @@ import {
   HttpCode,
   UsePipes,
   ValidationPipe,
+  Get,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
-import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskEntity } from './entities/task.entity';
 
-@Controller('task')
+@Controller('tasks')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
-
-  @UsePipes(new ValidationPipe({ whitelist: true }))
-  @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.taskService.create(createTaskDto);
-  }
-
-  @HttpCode(200)
-  @Get()
-  findAll() {
-    return this.taskService.findAll();
-  }
 
   @HttpCode(200)
   @Get(':id')

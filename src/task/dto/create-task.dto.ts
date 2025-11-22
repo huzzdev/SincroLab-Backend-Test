@@ -30,7 +30,8 @@ export class CreateTaskDto {
   createdAt: TaskEntity['createdAt'];
 
   updatedAt: TaskEntity['updatedAt'];
+}
 
-  @IsNotEmpty()
+export class CreateTaskDtoWithPatientId extends CreateTaskDto {
   patientId: TaskEntity['patientId'];
 }

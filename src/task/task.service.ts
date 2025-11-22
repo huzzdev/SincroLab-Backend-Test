@@ -1,19 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateTaskDto } from './dto/create-task.dto';
+import { CreateTaskDtoWithPatientId } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskEntity } from './entities/task.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { TaskStatus } from 'generated/prisma/enums';
 
 @Injectable()
 export class TaskService {
   constructor(private prisma: PrismaService) {}
 
-  create(createTaskDto: CreateTaskDto) {
-    return this.prisma.task.create({ data: createTaskDto });
+  create(createTaskDtoWithPatientId: CreateTaskDtoWithPatientId) {
+    if (!createTaskDtoWithPatientId.status) {
+      createTaskDtoWithPatientId.status = TaskStatus.pending;
+    }
+    return this.prisma.task.create({ data: createTaskDtoWithPatientId });
   }
 
-  findAll() {
-    return this.prisma.task.findMany();
+  findAll(patientId: TaskEntity['patientId']) {
+    return this.prisma.task.findMany({ where: { patientId } });
   }
 
   async findOne(id: TaskEntity['id']) {
