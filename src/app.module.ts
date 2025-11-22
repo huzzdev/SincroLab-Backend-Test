@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PatientModule } from './patient/patient.module';
+import { TaskModule } from './task/task.module';
 import environmentConfig from './config/environment';
 
 @Module({
@@ -16,6 +17,7 @@ import environmentConfig from './config/environment';
     UserModule,
     PrismaModule,
     PatientModule,
+    TaskModule,
   ],
 })
 export class AppModule {}
