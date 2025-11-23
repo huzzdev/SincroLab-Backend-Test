@@ -14,6 +14,7 @@ import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { Public } from './decorators/public.decorator';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from './guards/auth.guard';
+import { AuthPayloadEntity } from './entities/auth-payload.entity';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -59,6 +60,28 @@ export class AuthController {
   })
   login(@Body() body: CreateUserDto) {
     return this.authService.signIn(body);
+  }
+
+  @Public()
+  @HttpCode(200)
+  @Get('user')
+  @ApiOperation({ summary: 'Get current user' })
+  @ApiBody({
+    type: CreateUserDto,
+    examples: {
+      default: {
+        summary: 'Basic login',
+        value: {
+          email: 'therapist@example.com',
+          password: 'P@ssw0rd123',
+        },
+      },
+    },
+  })
+  me(@Request() request: { user: AuthPayloadEntity; token: string }) {
+    return {
+      user: request.user,
+    };
   }
 
   @ApiBearerAuth()

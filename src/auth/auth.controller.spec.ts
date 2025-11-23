@@ -119,6 +119,46 @@ describe('AuthController', () => {
     });
   });
 
+  describe('me', () => {
+    it('should return current user from request', () => {
+      const mockRequest = {
+        user: {
+          sub: 'user-id-123',
+          email: 'test@example.com',
+          role: 'therapist' as const,
+        },
+        token: 'mock-access-token',
+      };
+
+      const result = controller.me(mockRequest);
+
+      expect(result).toEqual({
+        user: mockRequest.user,
+      });
+    });
+
+    it('should return user with different role', () => {
+      const mockRequest = {
+        user: {
+          sub: 'user-id-456',
+          email: 'admin@example.com',
+          role: 'admin' as const,
+        },
+        token: 'mock-admin-token',
+      };
+
+      const result = controller.me(mockRequest);
+
+      expect(result).toEqual({
+        user: {
+          sub: 'user-id-456',
+          email: 'admin@example.com',
+          role: 'admin',
+        },
+      });
+    });
+  });
+
   describe('logout', () => {
     it('should logout user successfully', () => {
       const mockRequest = { token: 'mock-access-token' };

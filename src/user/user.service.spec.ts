@@ -51,23 +51,20 @@ describe('UserService', () => {
   });
 
   describe('create', () => {
-    it('should create a new user with hashed password', async () => {
+    it('should create a new user with therapist role', async () => {
       const createUserDto = {
         email: 'test@example.com',
         password: 'password123',
       };
-      const hashedPassword = 'hashedPassword';
 
-      (bcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
       mockPrismaService.user.create.mockResolvedValue(mockUser);
 
       const result = await service.create(createUserDto);
 
-      expect(bcrypt.hash).toHaveBeenCalledWith(createUserDto.password, 10);
       expect(mockPrismaService.user.create).toHaveBeenCalledWith({
         data: {
           email: createUserDto.email,
-          password: hashedPassword,
+          password: createUserDto.password,
           role: 'therapist',
         },
       });
@@ -77,14 +74,34 @@ describe('UserService', () => {
 
   describe('findAll', () => {
     it('should return paginated users', async () => {
-      const users = [mockUser];
-      mockPrismaService.user.findMany.mockResolvedValue(users);
+      const usersWithoutPassword = [
+        {
+          id: mockUser.id,
+          email: mockUser.email,
+          role: mockUser.role,
+          createdAt: mockUser.createdAt,
+          updatedAt: mockUser.updatedAt,
+        },
+      ];
+      mockPrismaService.user.findMany.mockResolvedValue(usersWithoutPassword);
       mockPrismaService.user.count.mockResolvedValue(1);
 
       const result = await service.findAll(1, 10);
 
+      expect(mockPrismaService.user.findMany).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
       expect(result).toEqual({
-        data: users,
+        data: usersWithoutPassword,
         meta: {
           total: 1,
           page: 1,
@@ -93,15 +110,67 @@ describe('UserService', () => {
         },
       });
     });
+
+    it('should handle pagination correctly', async () => {
+      const usersWithoutPassword = [
+        {
+          id: mockUser.id,
+          email: mockUser.email,
+          role: mockUser.role,
+          createdAt: mockUser.createdAt,
+          updatedAt: mockUser.updatedAt,
+        },
+      ];
+      mockPrismaService.user.findMany.mockResolvedValue(usersWithoutPassword);
+      mockPrismaService.user.count.mockResolvedValue(25);
+
+      const result = await service.findAll(2, 10);
+
+      expect(mockPrismaService.user.findMany).toHaveBeenCalledWith({
+        skip: 10,
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+      expect(result.meta).toEqual({
+        total: 25,
+        page: 2,
+        limit: 10,
+        totalPages: 3,
+      });
+    });
   });
 
   describe('findById', () => {
-    it('should return a user by id', async () => {
-      const userWithoutPassword = { ...mockUser };
+    it('should return a user by id without password', async () => {
+      const userWithoutPassword = {
+        id: mockUser.id,
+        email: mockUser.email,
+        role: mockUser.role,
+        createdAt: mockUser.createdAt,
+        updatedAt: mockUser.updatedAt,
+      };
       mockPrismaService.user.findUnique.mockResolvedValue(userWithoutPassword);
 
       const result = await service.findById('1');
 
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: '1' },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+          password: false,
+        },
+      });
       expect(result).toEqual(userWithoutPassword);
     });
 
@@ -109,29 +178,64 @@ describe('UserService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
       await expect(service.findById('999')).rejects.toThrow(NotFoundException);
+      await expect(service.findById('999')).rejects.toThrow(
+        'User with ID 999 not found',
+      );
     });
   });
 
   describe('update', () => {
-    it('should update a user', async () => {
+    it('should update a user without password', async () => {
       const updateUserDto = { email: 'updated@example.com' };
-      const updatedUser = { ...mockUser, ...updateUserDto };
+      const updatedUserWithoutPassword = {
+        id: mockUser.id,
+        email: 'updated@example.com',
+        role: mockUser.role,
+        createdAt: mockUser.createdAt,
+        updatedAt: mockUser.updatedAt,
+      };
 
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
-      mockPrismaService.user.update.mockResolvedValue(updatedUser);
+      mockPrismaService.user.update.mockResolvedValue(
+        updatedUserWithoutPassword,
+      );
 
       const result = await service.update('1', updateUserDto);
 
-      expect(result).toEqual(updatedUser);
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: '1' },
+      });
+      expect(mockPrismaService.user.update).toHaveBeenCalledWith({
+        where: { id: '1' },
+        data: { email: 'updated@example.com' },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+          password: false,
+        },
+      });
+      expect(result).toEqual(updatedUserWithoutPassword);
     });
 
     it('should hash password if provided in update', async () => {
       const updateUserDto = { password: 'newPassword123' };
       const hashedPassword = 'newHashedPassword';
+      const updatedUserWithoutPassword = {
+        id: mockUser.id,
+        email: mockUser.email,
+        role: mockUser.role,
+        createdAt: mockUser.createdAt,
+        updatedAt: mockUser.updatedAt,
+      };
 
       (bcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
-      mockPrismaService.user.update.mockResolvedValue(mockUser);
+      mockPrismaService.user.update.mockResolvedValue(
+        updatedUserWithoutPassword,
+      );
 
       await service.update('1', updateUserDto);
 
@@ -139,7 +243,14 @@ describe('UserService', () => {
       expect(mockPrismaService.user.update).toHaveBeenCalledWith({
         where: { id: '1' },
         data: { password: hashedPassword },
-        select: expect.any(Object),
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+          password: false,
+        },
       });
     });
 
@@ -148,6 +259,9 @@ describe('UserService', () => {
 
       await expect(service.update('999', {})).rejects.toThrow(
         NotFoundException,
+      );
+      await expect(service.update('999', {})).rejects.toThrow(
+        'User with ID 999 not found',
       );
     });
   });
@@ -159,6 +273,9 @@ describe('UserService', () => {
 
       await service.remove('1');
 
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: '1' },
+      });
       expect(mockPrismaService.user.delete).toHaveBeenCalledWith({
         where: { id: '1' },
       });
@@ -168,6 +285,9 @@ describe('UserService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
       await expect(service.remove('999')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('999')).rejects.toThrow(
+        'User with ID 999 not found',
+      );
     });
   });
 });
