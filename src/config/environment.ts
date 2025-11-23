@@ -8,6 +8,9 @@ const environmentConfig = () => {
     DATABASE: {
       URL: process.env.DATABASE_URL || 'file:./dev.db',
     },
+    CLIENT: {
+      URL: process.env.CLIENT_URL,
+    },
     JWT: {
       SECRET: process.env.JWT_SECRET,
       EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1h',

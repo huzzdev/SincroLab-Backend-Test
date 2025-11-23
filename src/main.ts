@@ -7,6 +7,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
+  app.enableCors({
+    origin: configService.get<string>('CLIENT_URL'),
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  });
+
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Sincrolab Test')
     .setDescription('Sincrolab Test API description')
