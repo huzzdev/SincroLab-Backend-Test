@@ -62,21 +62,10 @@ export class AuthController {
     return this.authService.signIn(body);
   }
 
+  @ApiBearerAuth()
   @HttpCode(200)
   @Get('user')
   @ApiOperation({ summary: 'Get current user' })
-  @ApiBody({
-    type: CreateUserDto,
-    examples: {
-      default: {
-        summary: 'Basic login',
-        value: {
-          email: 'therapist@example.com',
-          password: 'P@ssw0rd123',
-        },
-      },
-    },
-  })
   me(@Request() request: { user: AuthPayloadEntity; token: string }) {
     return {
       sub: request.user.sub,
