@@ -132,9 +132,7 @@ describe('AuthController', () => {
 
       const result = controller.me(mockRequest);
 
-      expect(result).toEqual({
-        user: mockRequest.user,
-      });
+      expect(result).toEqual(mockRequest.user);
     });
 
     it('should return user with different role', () => {
@@ -149,13 +147,7 @@ describe('AuthController', () => {
 
       const result = controller.me(mockRequest);
 
-      expect(result).toEqual({
-        user: {
-          sub: 'user-id-456',
-          email: 'admin@example.com',
-          role: 'admin',
-        },
-      });
+      expect(result).toEqual(mockRequest.user);
     });
   });
 

@@ -79,7 +79,9 @@ export class AuthController {
   })
   me(@Request() request: { user: AuthPayloadEntity; token: string }) {
     return {
-      user: request.user,
+      sub: request.user.sub,
+      email: request.user.email,
+      role: request.user.role,
     };
   }
 
