@@ -62,7 +62,6 @@ export class AuthController {
     return this.authService.signIn(body);
   }
 
-  @Public()
   @HttpCode(200)
   @Get('user')
   @ApiOperation({ summary: 'Get current user' })
