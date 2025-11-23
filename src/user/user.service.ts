@@ -6,6 +6,7 @@ import { UserWhereUniqueInput } from 'generated/prisma/models';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { Role } from 'generated/prisma/enums';
 
 @Injectable()
 export class UserService {
@@ -14,7 +15,7 @@ export class UserService {
   async create(data: CreateUserDto): Promise<UserEntity> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     return this.prisma.user.create({
-      data: { ...data, password: hashedPassword, role: 'therapist' },
+      data: { ...data, password: hashedPassword, role: Role.therapist },
     });
   }
 
