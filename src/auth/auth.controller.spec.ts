@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
-import { AuthGuard } from './auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
+import { AuthGuard } from './guards/auth.guard';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -120,22 +120,22 @@ describe('AuthController', () => {
   });
 
   describe('logout', () => {
-    it('should logout user successfully', async () => {
+    it('should logout user successfully', () => {
       const mockRequest = { token: 'mock-access-token' };
       authService.logout.mockReturnValue(undefined);
 
-      const result = await controller.logout(mockRequest);
+      const result = controller.logout(mockRequest);
 
       expect(authService.logout).toHaveBeenCalledWith('mock-access-token');
       expect(authService.logout).toHaveBeenCalledTimes(1);
       expect(result).toBeUndefined();
     });
 
-    it('should handle logout with different tokens', async () => {
+    it('should handle logout with different tokens', () => {
       const mockRequest = { token: 'different-token-456' };
       authService.logout.mockReturnValue(undefined);
 
-      await controller.logout(mockRequest);
+      controller.logout(mockRequest);
 
       expect(authService.logout).toHaveBeenCalledWith('different-token-456');
     });

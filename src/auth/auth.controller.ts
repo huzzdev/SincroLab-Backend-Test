@@ -11,9 +11,9 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
-import { AuthGuard } from './auth.guard';
 import { Public } from './decorators/public.decorator';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from './guards/auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')

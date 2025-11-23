@@ -1,0 +1,23 @@
+meta {
+  name: Update User
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{host}}/users/b22f6062-2a83-498a-a366-3a5bbdf27f78
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "updated@example.com",
+    "role": "admin"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
