@@ -16,8 +16,16 @@ export class TaskService {
     return this.prisma.task.create({ data: createTaskDtoWithPatientId });
   }
 
-  findAll(patientId: TaskEntity['patientId']) {
-    return this.prisma.task.findMany({ where: { patientId } });
+  findAll(patientId: TaskEntity['patientId'], page = 1, limit = 10) {
+    const take = Math.max(1, Math.min(limit, 50));
+    const skip = (Math.max(1, page) - 1) * take;
+
+    return this.prisma.task.findMany({
+      where: { patientId },
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findOne(id: TaskEntity['id']) {

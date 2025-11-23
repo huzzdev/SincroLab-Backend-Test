@@ -12,8 +12,15 @@ export class PatientService {
     return this.prisma.patient.create({ data: createPatientDto });
   }
 
-  findAll() {
-    return this.prisma.patient.findMany();
+  findAll(page = 1, limit = 10) {
+    const take = Math.max(1, Math.min(limit, 50));
+    const skip = (Math.max(1, page) - 1) * take;
+
+    return this.prisma.patient.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findOne(id: PatientEntity['id']) {

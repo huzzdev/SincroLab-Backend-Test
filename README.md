@@ -1,98 +1,173 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## Sincrolab Test Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS + Prisma backend for managing therapists, patients and their tasks. It exposes authenticated REST APIs for:
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+- Auth: register/login/logout users (therapists/admins)
+- Patients: CRUD operations on patients
+- Tasks: CRUD operations on patient tasks
 
-## Description
+The APIs are documented with Swagger at `/api` when the app is running.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+## Tech stack
+
+- **Runtime:** Node.js
+- **Language:** TypeScript (NestJS 11)
+- **Framework:** NestJS (REST controllers + DI)
+- **ORM:** Prisma
+- **Database:** SQLite (or any database supported by Prisma through `DATABASE_URL`)
+- **Auth:** JWT (access tokens with expiration) + bcrypt password hashing
+- **Validation:** `class-validator` + `class-transformer`
+
+---
+
+## Getting started (backend)
+
+### 1. Install dependencies
 
 ```bash
-$ pnpm install
+pnpm install
 ```
 
-## Compile and run the project
+### 2. Configure environment
+
+Copy `.env.example` to `.env` and fill in the values:
+
+- `DATABASE_URL` – Prisma connection string (SQLite URL by default)
+- `PORT` – Port where the HTTP server will listen (e.g. `3000`)
+- `JWT_SECRET` – Secret key used to sign JWT access tokens
+- `JWT_EXPIRES_IN` – Access token TTL, e.g. `3600s` or `1h`
+
+### 3. Run database migrations
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm prisma migrate dev
 ```
 
-## Run tests
+For production you can use:
 
 ```bash
-# unit tests
-$ pnpm run test
+pnpm prisma migrate deploy
+```
+
+### 4. Start the backend
+
+```bash
+# development (watch mode)
+pnpm dev
+
+# production build
+pnpm build
+pnpm start:prod
+```
+
+The server will start on `http://localhost:<PORT>`.
+
+Swagger UI is available at:
+
+- `http://localhost:<PORT>/api`
+
+---
+
+## Environment variables
+
+See `.env.example` for all keys. Main values:
+
+- `DATABASE_URL` – Prisma database connection string
+- `PORT` – HTTP port
+- `JWT_SECRET` – secret used to sign JWT access tokens
+- `JWT_EXPIRES_IN` – access token expiry (e.g. `3600s`)
+
+---
+
+## Database schema
+
+Prisma models (see `prisma/schema.prisma`):
+
+- **User**
+  - `id` (UUID)
+  - `email` (unique)
+  - `password` (bcrypt-hashed)
+  - `role` (`admin` | `therapist`)
+  - timestamps
+
+- **Patient**
+  - `id` (UUID)
+  - `fullName`
+  - timestamps
+  - relation: `tasks` – one patient has many tasks
+
+- **Task**
+  - `id` (UUID)
+  - `title`, optional `description`
+  - `status` (`pending` | `in_progress` | `done`)
+  - optional `dueDate`
+  - timestamps
+  - `patientId` – foreign key to `Patient`
+
+---
+
+## API overview
+
+The full, up‑to‑date API documentation is available via Swagger at `/api`. High-level routes:
+
+- **Auth**
+  - `POST /auth/register` – register a new user (email + password)
+  - `POST /auth/login` – login with email/password, returns JWT
+  - `GET /auth/logout` – revoke current access token
+
+- **Patients**
+  - `POST /patient` – create patient
+  - `GET /patient` – list patients (with pagination)
+  - `GET /patient/:id` – get patient by id
+  - `PATCH /patient/:id` – update patient
+  - `DELETE /patient/:id` – delete patient
+
+- **Tasks**
+  - `POST /patient/:id/tasks` – create a task for a patient
+  - `GET /patient/:id/tasks` – list tasks for a patient (with pagination)
+  - `GET /tasks/:id` – get a single task
+  - `PATCH /tasks/:id` – update a task
+  - `DELETE /tasks/:id` – delete a task
+
+All non‑public routes are protected by JWT via a global auth guard.
+
+---
+
+## Testing
+
+Run the automated test suite with:
+
+```bash
+pnpm test
 
 # e2e tests
-$ pnpm run test:e2e
+pnpm test:e2e
 
-# test coverage
-$ pnpm run test:cov
+# coverage
+pnpm test:cov
 ```
 
-## Deployment
+Tests cover happy paths (auth, patient/task creation) and validation/error scenarios.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+---
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Assumptions & limitations
 
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
+- Single JWT access token type (no refresh tokens).
+- In‑memory token revocation list (non‑persistent, resets between restarts).
+- Simple role model (`admin` and `therapist`) without fine‑grained permissions.
+- Pagination is basic page/limit style and not optimized for very large datasets.
+- Database defaults to SQLite for ease of local development.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## Future improvements
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- Add refresh tokens and proper token blacklisting (e.g. Redis).
+- Add richer role‑based access control (RBAC) for different user roles.
+- Improve pagination (cursor‑based, stable ordering) and filtering/search.
+- Add more comprehensive tests (unit + e2e, edge cases, performance).
+- Add request logging, metrics and better observability.
+- Add a production‑ready deployment guide and CI pipeline examples.
