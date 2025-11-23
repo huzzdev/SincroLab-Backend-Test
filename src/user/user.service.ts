@@ -20,11 +20,12 @@ export class UserService {
   }
 
   async findAll(page = 1, limit = 10) {
-    const skip = (page - 1) * limit;
+    const take = Math.max(1, Math.min(limit, 50));
+    const skip = (Math.max(1, page) - 1) * take;
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
         skip,
-        take: limit,
+        take,
         orderBy: { createdAt: 'desc' },
         select: {
           id: true,
